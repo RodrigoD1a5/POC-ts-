@@ -1,51 +1,71 @@
 import { QueryResult } from "pg";
-import connectionDb from "../config/database.ts";
+import prisma from "../config/database.ts";
 import { movie } from "../protocols/movieProtocol.ts";
+import { date } from "joi";
 
-async function findByName(name: string): Promise<QueryResult<movie>> {
-    return await connectionDb.query(`
-        SELECT * FROM movies WHERE name = $1
-    `, [name])
+async function findByName(name: string): Promise<movie> {
+    return await prisma.movies.findFirst({
+        where: {
+            name
+        }
+    })
 }
-async function insertMovie(newMovie: movie): Promise<QueryResult> {
-    return await connectionDb.query(`
-        INSERT INTO movies (name, platform, genre, status) 
-        VALUES ($1,$2,$3,$4);
-    `, [newMovie.name, newMovie.platform, newMovie.genre, newMovie.status])
-}
-
-async function getAll(): Promise<QueryResult> {
-    return await connectionDb.query(`
-        SELECT * FROM movies;
-    `)
-}
-
-async function getByPlatform(name: string): Promise<QueryResult> {
-    return await connectionDb.query(`
-        SELECT * FROM movies
-        WHERE movies.platform ILIKE $1
-    `, [name])
-}
-
-async function updateMovie(movieUpdate: movie, id: number): Promise<QueryResult> {
-    return await connectionDb.query(`
-        UPDATE movies 
-        SET name = $1 , platform = $2, genre = $3, status = $4
-        WHERE id=$5;
-    `, [movieUpdate.name, movieUpdate.platform, movieUpdate.genre, movieUpdate.status, id])
-
+async function insertMovie(
+    name: string,
+    platform: string,
+    genre: string,
+    status: boolean
+): Promise<movie> {
+    return await prisma.movies.create({
+        data: {
+            name,
+            platform,
+            genre,
+            status
+        }
+    })
 }
 
-async function findById(id: number): Promise<QueryResult<movie>> {
-    return await connectionDb.query(`
-        SELECT * FROM movies WHERE id=$1
-    `, [id])
+async function getAll(): Promise<movie[]> {
+    return await prisma.movies.findMany()
 }
 
-async function deleteMovie(id: number): Promise<QueryResult> {
-    return await connectionDb.query(`
-        DELETE FROM movies WHERE id=$1
-    `, [id])
+async function getByPlatform(name: string): Promise<movie[]> {
+    return await prisma.movies.findMany({
+        where: {
+            platform: name
+        }
+    })
+}
+
+async function updateMovie(movieUpdate: movie, id: number): Promise<movie> {
+    return await prisma.movies.update({
+        where: {
+            id
+        },
+        data: {
+            name: movieUpdate.name,
+            platform: movieUpdate.platform,
+            genre: movieUpdate.genre,
+            status: movieUpdate.status
+        }
+    })
+}
+
+async function findById(id: number): Promise<movie> {
+    return await prisma.movies.findUnique({
+        where: {
+            id
+        }
+    })
+}
+
+async function deleteMovie(id: number): Promise<movie> {
+    return await prisma.movies.delete({
+        where: {
+            id
+        }
+    })
 }
 
 export default {

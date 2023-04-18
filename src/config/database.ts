@@ -1,9 +1,5 @@
-import pg from "pg";
+import { PrismaClient } from "@prisma/client"
 
-const { Pool } = pg;
+const prisma = new PrismaClient();
 
-const connectionDb = new Pool({
-    connectionString: "postgres://postgres:root@localhost:5432/movieapi"
-});
-
-export default connectionDb;
+export default prisma

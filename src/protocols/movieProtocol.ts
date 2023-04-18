@@ -4,5 +4,3 @@ export type movie = {
     genre: string,
     status: boolean
 }
-
-export type movies = movie[]
